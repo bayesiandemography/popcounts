@@ -1,0 +1,51 @@
+Package: popcounts
+Title: Bayesian Demographic Accounts from Population Data
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "John",
+             family = "Bryant",
+             role = c("aut", "cre"),
+             email = "john@bayesiandemography.com"),
+      person(given = "Junni",
+             family = "Zhang",
+             role = "aut",
+             email = "junnizhang@163.com"))
+Description: Estimate a Bayesian demographic account from 
+    imperfect data on population counts. Estimation is 
+    done using Template Model Builder.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+LazyData: true
+Depends:
+    R (>= 4.3.0),
+    rvec (>= 1.0.0)
+Imports:
+    cli,
+    generics,
+    Matrix,
+    methods,
+    parallel,
+    poputils (>= 0.3.4),
+    sparseMVN,
+    stats,
+    tibble,
+    TMB,
+    utils,
+    vctrs
+Suggests:
+    bookdown,
+    dplyr,
+    ggplot2,
+    knitr,
+    rmarkdown,
+    rlang,
+    testthat (>= 3.0.0),
+    tidyr
+Config/testthat/edition: 3
+Config/Needs/website: bookdown
+LinkingTo: 
+    TMB (>= 1.9.1),
+    RcppEigen
+VignetteBuilder: knitr
