@@ -22,11 +22,11 @@ Depends:
     R (>= 4.3.0),
     rvec (>= 1.0.0)
 Imports:
+    agetime,
     cli,
     generics,
     Matrix,
     methods,
-    parallel,
     poputils (>= 0.3.4),
     sparseMVN,
     stats,

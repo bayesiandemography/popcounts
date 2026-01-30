@@ -122,6 +122,7 @@ alpha_to_e0_single <- function(alpha, lx_std, pr_fem) {
 #'
 #' @noRd
 alpha_to_lx <- function(alpha, lx_std) {
+  lx_std <- lx_std$lx
   lx_std <- lx_std / lx_std[[1L]]
   qx_std <- 1 - lx_std
   logit_qx_std <- poputils::logit(qx_std)
@@ -132,25 +133,55 @@ alpha_to_lx <- function(alpha, lx_std) {
 
 
 #' Calculate Alpha Given Single Value
-#' for Life Expectancy at Birth
+#' for Life Expectancy at Birth - Life Table Ages
 #'
 #' Calculate parameter from Brass logit model,
-#' given (total) life expectancy
+#' given (total) life expectancy,
+#' for abridged life table
 #'
 #' @param e0 A length-1 numeric vector
 #' or rvec
 #' @param lx_std Numeric vector
-#' @param agetime_step Numeric scalar
 #' @param pr_fem Proportion of births that are
 #' female. Numeric scalar.
 #'
 #' @returns A scalar
-e0_to_alpha <- function(e0, lx_std, agetime_step, pr_fem) {
+e0_to_alpha_lt <- function(e0, lx_std, pr_fem) {
   FUN <- function(x)
-    e0_to_alpha_inner(e0 = x,
-                      lx_std = lx_std,
-                      agetime_step = agetime_step,
-                      pr_fem = pr_fem)
+    e0_to_alpha_lt_inner(e0 = x,
+                         lx_std = lx_std,
+                         pr_fem = pr_fem)
+  if (rvec::is_rvec(e0)) {
+    e0 <- as.numeric(e0)
+    ans <- vapply(e0, FUN, FUN.VALUE = 1.0, USE.NAMES = FALSE)
+    ans <- matrix(ans, nrow = 1L)
+    ans <- rvec::rvec(ans)
+  }
+  else
+    ans <- FUN(e0)
+  ans
+}
+
+
+#' Calculate Alpha Given Single Value
+#' for Life Expectancy at Birth - Single Ages
+#'
+#' Calculate parameter from Brass logit model,
+#' given (total) life expectancy,
+#' for complege life table
+#'
+#' @param e0 A length-1 numeric vector
+#' or rvec
+#' @param lx_std Numeric vector
+#' @param pr_fem Proportion of births that are
+#' female. Numeric scalar.
+#'
+#' @returns A scalar
+e0_to_alpha_single <- function(e0, lx_std, pr_fem) {
+  FUN <- function(x)
+    e0_to_alpha_single_inner(e0 = x,
+                             lx_std = lx_std,
+                             pr_fem = pr_fem)
   if (rvec::is_rvec(e0)) {
     e0 <- as.numeric(e0)
     ans <- vapply(e0, FUN, FUN.VALUE = 1.0, USE.NAMES = FALSE)
@@ -181,6 +212,32 @@ e0_to_alpha_lt_inner <- function(e0, lx_std, pr_fem) {
     e0_implied <- alpha_to_e0_lt(alpha = alpha,
                                  lx_std = lx_std,
                                  pr_fem = pr_fem)
+    abs(e0_implied - e0)
+  }
+  val_optim <- stats::optimize(f = abs_error,
+                               interval = c(-10, 10))
+  val_optim$minimum
+}
+
+
+## HAS_TESTS
+#' Calculate Alpha Given Single Value
+#' for Life Expectancy at Birth - Single-Year Age groups
+#'
+#' Calculate parameter from Brass logit model,
+#' given (total) life expectancy
+#'
+#' @param e0 A scalar
+#' @param lx_std Numeric vector
+#' @param pr_fem Proportion of births that are
+#' female. Numeric scalar.
+#'
+#' @returns A scalar
+e0_to_alpha_single_inner <- function(e0, lx_std, pr_fem) {
+  abs_error <- function(alpha) {
+    e0_implied <- alpha_to_e0_single(alpha = alpha,
+                                     lx_std = lx_std,
+                                     pr_fem = pr_fem)
     abs(e0_implied - e0)
   }
   val_optim <- stats::optimize(f = abs_error,
@@ -305,14 +362,15 @@ Lx_to_e0 <- function(Lx, pr_fem) {
 #'
 #' @param tfr Total fertility rate. A length-1
 #' numeric vector or rvec.
-#' @param asfr_standard A standard set of ASFR.
-#' Normalised internally. A numeric vector.
+#' @param asfr_std A standard set of ASFR.
+#' Normalised internally. A data frame.
 #' @param agetime_step Numeric scalar.
 #'
 #' @returns A length-1 numeric vector or rvec.
 #'
 #' @noRd
 tfr_to_asfr <- function(tfr, asfr_std, agetime_step) {
-  (tfr * asfr_std) / (agetime_step * sum(asfr_std))
+  asfr_val <- asfr_std$value
+  (tfr * asfr_val) / (agetime_step * sum(asfr_val))
 }
 

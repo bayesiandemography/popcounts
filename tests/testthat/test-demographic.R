@@ -114,69 +114,108 @@ test_that("'alpha_to_lx' works with valid inputs", {
 })
 
 
-## 'e0_to_alpha' --------------------------------------------------------------
+## 'e0_to_alpha_lt' -----------------------------------------------------------
 
-test_that("'e0_to_alpha' works with numeric", {
+test_that("'e0_to_alpha_lt' works with numeric", {
   e0 <- 28.3
-  lx_std <- poputils::west_lifetab |>
-    subset(level == 3, select = "lx") |>
-    unlist()
-  agetime_step <- 5
+  lx_std <- lx_west_7_abridged$lx
   pr_fem <- 0.49
-  ans <- e0_to_alpha(e0 = e0,
-                     lx_std = lx_std,
-                     agetime_step = agetime_step,
-                     pr_fem = pr_fem)
-  e0_implied <- alpha_to_e0(ans,
-                            lx_std = lx_std,
-                            agetime_step = agetime_step,
-                            pr_fem = pr_fem)
+  ans <- e0_to_alpha_lt(e0 = e0,
+                        lx_std = lx_std,
+                        pr_fem = pr_fem)
+  e0_implied <- alpha_to_e0_lt(ans,
+                               lx_std = lx_std,
+                               pr_fem = pr_fem)
   expect_equal(e0, e0_implied, tolerance = 0.001)
 })
 
-test_that("'e0_to_alpha' works with rvec", {
+test_that("'e0_to_alpha_lt' works with rvec", {
   e0 <- rvec::rvec(matrix(c(28.3, 27.2, 30.1), nr = 1))
-  lx_std <- poputils::west_lifetab |>
-    subset(level == 3, select = "lx") |>
-    unlist()
-  agetime_step <- 5
+  lx_std <- lx_west_7_abridged$lx
   pr_fem <- 0.49
-  ans <- e0_to_alpha(e0 = e0,
-                     lx_std = lx_std,
-                     agetime_step = agetime_step,
-                     pr_fem = pr_fem)
-  e0_implied <- c(alpha_to_e0(as.numeric(ans)[1],
-                              lx_std = lx_std,
-                              agetime_step = agetime_step,
-                              pr_fem = pr_fem),
-                  alpha_to_e0(as.numeric(ans)[2],
-                              lx_std = lx_std,
-                              agetime_step = agetime_step,
-                              pr_fem = pr_fem),
-                  alpha_to_e0(as.numeric(ans)[3],
-                              lx_std = lx_std,
-                              agetime_step = agetime_step,
-                              pr_fem = pr_fem))
+  ans <- e0_to_alpha_lt(e0 = e0,
+                        lx_std = lx_std,
+                        pr_fem = pr_fem)
+  e0_implied <- c(alpha_to_e0_lt(as.numeric(ans)[1],
+                                 lx_std = lx_std,
+                                 pr_fem = pr_fem),
+                  alpha_to_e0_lt(as.numeric(ans)[2],
+                                 lx_std = lx_std,
+                                 pr_fem = pr_fem),
+                  alpha_to_e0_lt(as.numeric(ans)[3],
+                                 lx_std = lx_std,
+                                 pr_fem = pr_fem))
   e0_implied <- rvec::rvec(matrix(e0_implied, nr = 1))
   expect_equal(e0, e0_implied, tolerance = 0.001)
 })
 
 
-## 'e0_to_alpha_lt_inner' --------------------------------------------------------
+## 'e0_to_alpha_single' -------------------------------------------------------
 
-test_that("'alpha_to_alpha_lt_inner' works with valid inputs", {
+test_that("'e0_to_alpha_single' works with numeric", {
   e0 <- 28.3
-  lx_std <- poputils::west_lifetab |>
-    subset(level == 3, select = "lx") |>
-    unlist()
-  agetime_step <- 5
+  lx_std <- lx_west_7_complete$lx
   pr_fem <- 0.49
-  ans <- e0_to_alpha_inner(e0 = e0,
-                           lx_std = lx_std,
-                           pr_fem = pr_fem)
-  e0_implied <- alpha_to_e0(ans,
+  ans <- e0_to_alpha_single(e0 = e0,
                             lx_std = lx_std,
                             pr_fem = pr_fem)
+  e0_implied <- alpha_to_e0_single(ans,
+                                   lx_std = lx_std,
+                                   pr_fem = pr_fem)
+  expect_equal(e0, e0_implied, tolerance = 0.001)
+})
+
+test_that("'e0_to_alpha_single' works with rvec", {
+  e0 <- rvec::rvec(matrix(c(28.3, 27.2, 30.1), nr = 1))
+  lx_std <- lx_west_7_complete$lx
+  pr_fem <- 0.49
+  ans <- e0_to_alpha_single(e0 = e0,
+                            lx_std = lx_std,
+                            pr_fem = pr_fem)
+  e0_implied <- c(alpha_to_e0_single(as.numeric(ans)[1],
+                                     lx_std = lx_std,
+                                     pr_fem = pr_fem),
+                  alpha_to_e0_single(as.numeric(ans)[2],
+                                     lx_std = lx_std,
+                                     pr_fem = pr_fem),
+                  alpha_to_e0_single(as.numeric(ans)[3],
+                                     lx_std = lx_std,
+                                     pr_fem = pr_fem))
+  e0_implied <- rvec::rvec(matrix(e0_implied, nr = 1))
+  expect_equal(e0, e0_implied, tolerance = 0.001)
+})
+
+
+## 'e0_to_alpha_lt_inner' -----------------------------------------------------
+
+test_that("'alpha_to_alpha_lt_inner' works", {
+  e0 <- 28.3
+  lx_std <- lx_west_7_abridged$lx
+  agetime_step <- 5
+  pr_fem <- 0.49
+  ans <- e0_to_alpha_lt_inner(e0 = e0,
+                              lx_std = lx_std,
+                              pr_fem = pr_fem)
+  e0_implied <- alpha_to_e0_lt(ans,
+                               lx_std = lx_std,
+                               pr_fem = pr_fem)
+  expect_equal(e0, e0_implied, tolerance = 0.001)
+})
+
+
+## 'e0_to_alpha_single_inner' -------------------------------------------------
+
+test_that("'alpha_to_alpha_single_inner' works", {
+  e0 <- 28.3
+  lx_std <- lx_west_7_complete$lx
+  agetime_step <- 5
+  pr_fem <- 0.49
+  ans <- e0_to_alpha_single_inner(e0 = e0,
+                                  lx_std = lx_std,
+                                  pr_fem = pr_fem)
+  e0_implied <- alpha_to_e0_single(ans,
+                                   lx_std = lx_std,
+                                   pr_fem = pr_fem)
   expect_equal(e0, e0_implied, tolerance = 0.001)
 })
 
@@ -279,7 +318,8 @@ test_that("'Lx_to_e0' works with valid inputs", {
 test_that("'tfr_to_asfr' works with valid inputs", {
   asfr <- c(1, 0.9, 0.8, 0.75, 0.4)
   tfr <- 5 * sum(asfr)
-  asfr_std <- 3 * proportions(asfr)
+  asfr_std <- data.frame(age = 11:15,
+                         value = 3 * proportions(asfr))
   ans_obtained <- tfr_to_asfr(tfr = tfr,
                               asfr_std = asfr_std,
                               agetime_step = 5)

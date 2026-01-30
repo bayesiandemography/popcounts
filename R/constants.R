@@ -1,4 +1,8 @@
 
+
+get_beta_param <- function() c(2, 2)
+
+
 ## HAS_TESTS
 #' Synonyms for Unknown
 #'
@@ -9,5 +13,7 @@
 #'
 #' @noRd
 get_labels_unknown <- function() "unknown"
+
+
 
   

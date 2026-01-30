@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{components}
+\alias{generate}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -11,6 +12,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{generics}{\code{\link[generics]{components}}}
+  \item{generics}{\code{\link[generics]{components}}, \code{\link[generics]{generate}}}
 }}
 

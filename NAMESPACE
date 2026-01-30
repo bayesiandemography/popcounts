@@ -2,5 +2,7 @@
 
 export(components)
 export(fit_model)
+export(generate)
 importFrom(generics,components)
+importFrom(generics,generate)
 useDynLib(popcounts, .registration = TRUE)
