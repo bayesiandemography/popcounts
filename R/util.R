@@ -14,11 +14,11 @@ find_var_popn <- function(nms) {
 #' Draw pi ~ p(pi | y) when x has flat prior and y | x,pi ~ Binom(x,pi)
 #'
 #' Model:
-#'   p(x) \propto 1 for x = 0,1,2,...
+#'   p(x) \propto 1 for x = 1,2,...
 #'   y | x, pi ~ Binomial(x, pi)
 #'
 #' Prior for pi:
-#'   pi = l + X*(u - l),  X ~ Beta(2,2),  with 0 < l < u < 1
+#'   pi = l + X*(u - l),  X ~ Beta(a,b),  with 0 < l < u < 1
 #'
 #' Sampling:
 #'   Rejection sampling with proposal X ~ Beta(2,2)
@@ -27,28 +27,17 @@ find_var_popn <- function(nms) {
 #' @param y Integer scalar >= 1
 #' @param l Lower bound for pi (0 < l < u)
 #' @param u Upper bound for pi (l < u < 1)
+#' @param a,b Beta distribution parameters
 #' @param max_tries Maximum rejection iterations before error
 #' 
 #' @return Numeric scalar pi in (l,u)
 #'
 #' @noRd
-draw_pi_given_y <- function(y, l, u, max_tries = 1e6) {
-  beta_param <- get_beta_param()
-  shape1 <- beta_param[[1L]]
-  shape2 <- beta_param[[2L]]
-  # y == 1: posterior over pi is the prior (since (pi)^(y-1) = 1)
-  if (y == 1L) {
-    x <- stats::rbeta(n = 1L, shape1 = shape1, shape2 = shape2)
-    return(l + x * (u - l))
-  }
-  # Rejection sampling
+draw_pi_given_y <- function(y, l, u, a, b, max_tries = 1e6) {
   for (i in seq_len(max_tries)) {
-    x <- stats::rbeta(n = 1L, shape1 = shape1, shape2 = shape2)
+    x <- stats::rbeta(n = 1L, shape1 = a, shape2 = b)
     pi <- l + x * (u - l)
-    # accept prob = (pi/u)^(y-1); compute on log scale for stability
-    log_acc <- (y - 1L) * (log(pi) - log(u))
-    # Compare log(U) < log_acc
-    if (log(stats::runif(1L)) < log_acc)
+    if (stats::runif(1L) < l / pi)
       return(pi)
   }
   cli::cli_abort("Internal error: Exceeded 'max_tries' in rejection sampler.")
@@ -66,13 +55,21 @@ draw_pi_given_y <- function(y, l, u, max_tries = 1e6) {
 #' @param y Integer scalar >= 1
 #' @param l Lower bound for pi (0 < l < u)
 #' @param u Upper bound for pi (l < u < 1)
+#' @param a,b Beta parameters
 #' @param max_tries Maximum rejection iterations for drawing pi
 #' 
 #' @return Integer scalar x >= y
 #'
 #' @noRd
-draw_x_given_y <- function(y, l, u, max_tries = 1e6) {
-  pi <- draw_pi_given_y(y = y, l = l, u = u, max_tries = max_tries)
-  v <- stats::rnbinom(n = 1L, size = y + 1L, prob = pi)
+draw_x_given_y <- function(y, l, u, a, b, max_tries = 1e6) {
+  pi <- draw_pi_given_y(y = y,
+                        l = l,
+                        u = u,
+                        a = a,
+                        b = b,
+                        max_tries = max_tries)
+  v <- stats::rnbinom(n = 1L,
+                      size = y + 1L,
+                      prob = pi)
   y + v
 }

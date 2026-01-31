@@ -354,7 +354,7 @@ Lx_to_e0 <- function(Lx, pr_fem) {
   e0_male <- sum(Lx_male)
   pr_fem * e0_female + (1 - pr_fem) * e0_male
 }
-
+  
 
 ## HAS_TESTS
 #' Calculate Age-Specific Fertility Rates

@@ -20,6 +20,31 @@ check_data_frame_has_nonzero_rows <- function(x, nm_x) {
   invisible(TRUE)
 }
 
+
+#' Check That No Arguments Absorbed By Dots in Function
+#'
+#' @param dots Arguments absorbed
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_has_no_dots <- function(...) {
+  dots <- list(...)
+  n_dot <- length(dots)
+  if (n_dot > 0L) {
+    nms <- names(dots)
+    if (is.null(nms))
+        cli::cli_abort("Invalid unnamed {cli::qty{n_dot}} argument{?s}.")
+    else {
+      i_nonblank <- match(TRUE, nzchar(nms))
+      nm <- nms[[i_nonblank]]
+      cli::cli_abort("{.arg {nm}} is not a valid argument.")
+    }
+  }
+  invisible(TRUE)
+}
+
+
 check_popn <- function(df, nm_df, var_popn) {
   popn <- df[[var_popn]]
   if (!is.numeric(popn))

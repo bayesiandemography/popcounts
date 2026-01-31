@@ -159,7 +159,8 @@ make_popn_true <- function(var_age,
   }
   ans <- expand.grid(classif_vars,
                      KEEP.OUT.ATTRS = FALSE)
-  ans[[var_popn]] <- NA_real_
+  n <- nrow(ans)
+  ans[[var_popn]] <- rvec::new_rvec_dbl(length = n, n_draw = n_draw)
   ans <- tibble::tibble(ans)
   ans
 }

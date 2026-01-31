@@ -86,7 +86,9 @@ get_popn_obs <- function(popaccount) popaccount$popn_obs
 
 get_popn_true <- function(popaccount) popaccount$account$popn_true
 
-get_tfr_lim <- function(popaccount)  popaccount$sysmod$fert$tfr_lim
+get_tfr_lim <- function(popaccount) popaccount$sysmod$fert$tfr_lim
+
+get_times <- function(popaccount) popaccount$control$times
 
 get_total_init_obs <- function(popaccount) {
   popn_obs <- get_popn_obs(popaccount)
