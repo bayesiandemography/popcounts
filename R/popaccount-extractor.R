@@ -1,6 +1,7 @@
 
 ## Internal extractor functions
 
+
 get_age_asfr_std <- function(popaccount) {
   asfr_std <- get_asfr_std(popaccount)
   nms <- names(asfr_std)
@@ -16,56 +17,46 @@ get_age_lx_std <- function(popaccount) {
 }
 
 get_age_mid <- function(popaccount) {
-  age_true <- get_age_true(popaccount)
-  agetime::age_mid(age_true)
+  age_true <- get_age(popaccount)
+  age_time::age_mid(age_true)
 }
 
 
 get_age_open <- function(popaccount) popaccount$control$age_open
 
-get_agetime_step <- function(popaccount) popaccount$control$agetime_step
+get_time_step <- function(popaccount) popaccount$control$time_step
 
 
-get_age_true <- function(popaccount) {
-  agetime_step <- get_agetime_step(popaccount)
+get_age <- function(popaccount) {
+  time_step <- get_time_step(popaccount)
   age_open <- get_age_open(popaccount)
-  if (agetime_step == 1L)
-    agetime::age_labels_one(lower_last = age_open)
-  else
-    agetime::age_labels_five(lower_last = age_open)
+  make_age(time_step = time_step,
+           age_open = age_open)
 }
 
 
-get_alpha_lim <- function(popaccount) {
-  e0_lim <- get_e0_lim(popaccount)
-  lx_std <- get_lx_std(popaccount)
-  pr_fem <- get_pr_fem(popaccount)
-  agetime_step <- get_agetime_step(popaccount)
-  e0_min <- e0_lim[[1L]]
-  e0_max <- e0_lim[[2L]]
-  if (agetime_step == 1L)
-    e0_to_alpha <- e0_to_alpha_single
-  else
-    e0_to_alpha <- e0_to_alpha_lt
-  alpha_min <- e0_to_alpha(e0 = e0_min,
-                           lx_std = lx_std,
-                           pr_fem = pr_fem)
-  alpha_max <- e0_to_alpha(e0 = e0_max,
-                           lx_std = lx_std,
-                           pr_fem = pr_fem)
-  c(alpha_min, alpha_max)
+get_age_repr <- function(popaccount) {
+  age <- get_age(popaccount)
+  i_repr <- get_i_repr(popaccount)
+  age[i_repr]
 }
+
+get_age_sex_disp <- function(popaccount) popaccount$sysmod$popn$age_sex_disp
+
+
 
 get_asfr_std <- function(popaccount)  popaccount$sysmod$fert$asfr_std
 
 
-get_e0_lim <- function(popaccount)  popaccount$sysmod$mort$e0_lim
+get_alpha_mean <- function(popaccount)  popaccount$sysmod$mort$alpha_mean
+
+get_alpha_disp <- function(popaccount)  popaccount$sysmod$mort$alpha_disp
 
 ## assumes that dominant sex always comes first
 get_i_repr <- function(popaccount) {
   age_asfr <- get_age_asfr_std(popaccount)
-  age_true <- get_age_true(popaccount)
-  agetime::age_match(age_asfr, age_true)
+  age <- get_age(popaccount)
+  agetime::age_match(age_asfr, age)
 }
   
 
@@ -80,15 +71,21 @@ get_pr_fem <- function(popaccount)  {
 }
 
 
-get_prob_obs_lim <- function(popaccount) popaccount$datamod$prob_obs_lim
+get_prob_obs <- function(popaccount) popaccount$datamod$prob_obs
 
 get_popn_obs <- function(popaccount) popaccount$popn_obs
 
 get_popn_true <- function(popaccount) popaccount$account$popn_true
 
-get_tfr_lim <- function(popaccount) popaccount$sysmod$fert$tfr_lim
+get_tfr_mean <- function(popaccount) popaccount$sysmod$fert$tfr_mean
 
-get_times <- function(popaccount) popaccount$control$times
+get_tfr_disp <- function(popaccount) popaccount$sysmod$fert$tfr_disp
+
+
+get_total_init_mean <- function(popaccount) popaccount$sysmod$popn$total_init_mean
+
+get_total_init_disp <- function(popaccount) popaccount$sysmod$popn$total_init_disp
+
 
 get_total_init_obs <- function(popaccount) {
   popn_obs <- get_popn_obs(popaccount)

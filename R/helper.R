@@ -15,11 +15,11 @@
 ## #' why five-year age group not feasible
 ## #'
 ## #' @noRd
-## can_use_agetime_step_five <- function(age_obs, time_obs) {
+## can_use_time_step_five <- function(age_obs, time_obs) {
 ##   labels_unknown <- get_labels_unknown()
 ##   is_unknown <- age_obs %in% labels_unknown
-##   age_lower_obs <- agetime::age_lower(age_obs[!is_unknown])
-##   age_upper_obs <- agetime::age_upper(age_obs[!is_unknown])
+##   age_lower_obs <- age_time::age_lower(age_obs[!is_unknown])
+##   age_upper_obs <- age_time::age_upper(age_obs[!is_unknown])
 ##   invalid_lower <- age_lower_obs %% 5L != 0L
 ##   invalid_upper <- (is.finite(age_upper_obs)
 ##     & (age_upper_obs %% 5L != 0L))

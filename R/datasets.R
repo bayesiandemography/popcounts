@@ -50,7 +50,7 @@
 #' downloaded from the page "Model Life Tables"
 #' on the United Nations Population Division
 #' website on 19 January 2026.
-"lx_west_7_complete"
+"lx_west_7_abridged"
 
 
 

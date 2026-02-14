@@ -1,10 +1,18 @@
 
-## If 'make_agetime_step' has been run already,
+
+make_age <- function(time_step, age_open) {
+  if (time_step == 1L)
+    agetime::age_labels_one(lower_last = age_open)
+  else
+    agetime::age_labels_five(lower_last = age_open)
+}
+
+## If 'make_time_step' has been run already,
 ## and user supplied value for 'age_open',
 ## then that value guaranteed compatible with
-## 'agetime_step'.
+## 'time_step'.
 make_age_open <- function(age_open,
-                          agetime_step,
+                          time_step,
                           popn_obs,
                           var_age) {
   user_supplied_value <- !is.null(age_open)
@@ -27,62 +35,41 @@ make_age_open <- function(age_open,
   }
   else {
     max_lower_upper <- max(c(lower, upper[is.finite(upper)]), na.rm = TRUE)
-    if (max_lower_upper %% agetime_step == 0L)
+    if (max_lower_upper %% time_step == 0L)
       ans <- max_lower_upper
     else
-      ans <- ((max_lower_upper %/% agetime_step) + 1L) * agetime_step
+      ans <- ((max_lower_upper %/% time_step) + 1L) * time_step
   }
   ans <- as.integer(ans)
   ans
 }
 
 
-## TODO - NEED TO ENSURE THAT FEMALES COME FIRST IN Lx, Population
-make_age_sex_distn_init <- function(popaccount,
-                                    Lx,
-                                    asfr) {
-  pr_fem <- get_pr_fem(popaccount)
-  i_repr <- get_i_repr(popaccount)
-  age_mid <- get_age_mid(popaccount)
-  mx <- pr_fem * asfr
-  Lx_repr <- Lx[i_repr]
-  age_mid_repr <- age_mid[i_repr]
-  r <- poputils::.intrinsic_growth_rate(mx = mx,
-                                        Lx = Lx_repr,
-                                        age_mid = age_mid_repr)
-  n2 <- length(Lx) %/% 2L
-  pr <- rep(c(pr_fem, 1 - pr_fem), each = n2)
-  age_mid <- rep(age_mid, times = 2L)
-  ans <- exp(-r * age_mid) * pr * Lx
-  ans <- ans / sum(ans)
-  ans
-}
-
 
       
-#' Make 'agetime_step'
+#' Make 'time_step'
 #'
 #' Includes check that value supplied
-#' for 'agetime_step' is valid.
+#' for 'time_step' is valid.
 #' 
-#' @param agetime_step Value provided by user or NULL
+#' @param time_step Value provided by user or NULL
 #' @param age_obs Age variable from 'popn_obs'
 #' @param time_obs Time variable from 'popn_obs' or NULL
 #'
 #' @param returns 1L or 5L
 #'
 #' @noRd
-make_agetime_step <- function(agetime_step,
+make_time_step <- function(time_step,
                               age_open,
                               popn_obs,
                               var_age,
                               var_time) {
   valid_values <- c(1L, 5L)
-  user_supplied_value <- !is.null(agetime_step)
+  user_supplied_value <- !is.null(time_step)
   if (user_supplied_value) {
-    if (!(agetime_step %in% c(1L, 5L)))
-      cli::cli_abort(c("{.arg agetime_step} must be {.val {1}} or {.val {5}}.",
-                       "Value supplied: {.val {agetime_step}}."))
+    if (!(time_step %in% c(1L, 5L)))
+      cli::cli_abort(c("{.arg time_step} must be {.val {1}} or {.val {5}}.",
+                       "Value supplied: {.val {time_step}}."))
   }
   val_age <- popn_obs[[var_age]]
   lower <- agetime::age_lower(val_age)
@@ -97,17 +84,17 @@ make_agetime_step <- function(agetime_step,
   }
   age_open_uses_5 <- is.null(age_open) || (age_open %% 5L == 0L)
   if (user_supplied_value) {
-    if (agetime_step == 5L) {
+    if (time_step == 5L) {
       if (!age_uses_5)
-        cli::cli_abort(paste("Value for {.arg agetime_step} ({.val {5}})",
+        cli::cli_abort(paste("Value for {.arg time_step} ({.val {5}})",
                              "not compatible with {.var {var_age}} variable",
                              "in {.arg popn_obs}."))
       if (!time_uses_5)
-        cli::cli_abort(paste("Value for {.arg agetime_step} ({.val {5}})",
+        cli::cli_abort(paste("Value for {.arg time_step} ({.val {5}})",
                              "not compatible with {.var {var_time}} variable",
                              "in {.arg popn_obs}."))
       if (!age_open_uses_5)
-        cli::cli_abort(paste("Value for {.arg agetime_step} ({.val {5}})",
+        cli::cli_abort(paste("Value for {.arg time_step} ({.val {5}})",
                              "not compatible with {.var {var_time}} variable",
                              "in {.arg popn_obs}."))
       ans <- 5L
@@ -125,15 +112,15 @@ make_agetime_step <- function(agetime_step,
 }
 
 
-make_asfr_std <- function(agetime_step) {
-  if (agetime_step == 1L)
+make_asfr_std <- function(time_step) {
+  if (time_step == 1L)
     booth_standard_1
   else
     booth_standard_5
 }
 
-make_lx_std <- function(agetime_step) {
-  if (agetime_step == 1L)
+make_lx_std <- function(time_step) {
+  if (time_step == 1L)
     lx_west_7_complete
   else
     lx_west_7_abridged
@@ -143,10 +130,10 @@ make_popn_true <- function(var_age,
                            var_sex,
                            var_time,
                            var_popn,
-                           agetime_step,
+                           time_step,
                            age_open,
                            times) {
-  if (agetime_step == 1L)
+  if (time_step == 1L)
     age <- agetime::age_labels_one(lower_last = age_open)
   else
     age <- agetime::age_labels_five(lower_last = age_open)
@@ -166,7 +153,7 @@ make_popn_true <- function(var_age,
 }
   
     
-make_times <- function(agetime_step,
+make_times <- function(time_step,
                        popn_obs,
                        var_time) {
   if (is.null(var_time))
@@ -176,7 +163,7 @@ make_times <- function(agetime_step,
   time_last <- max(val_time, na.rm = TRUE)
   seq.int(from = time_first,
           to = time_last,
-          by = agetime_step)
+          by = time_step)
 }
 
 make_var_age <- function(popn_obs) {

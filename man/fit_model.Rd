@@ -4,7 +4,7 @@
 \alias{fit_model}
 \title{Fit the TMB model}
 \usage{
-fit_model(data_list, parameters_list)
+fit_model(popaccount, popn_obs)
 }
 \arguments{
 \item{data_list}{A list of data}

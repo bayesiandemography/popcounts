@@ -191,7 +191,7 @@ test_that("'e0_to_alpha_single' works with rvec", {
 test_that("'alpha_to_alpha_lt_inner' works", {
   e0 <- 28.3
   lx_std <- lx_west_7_abridged$lx
-  agetime_step <- 5
+  time_step <- 5
   pr_fem <- 0.49
   ans <- e0_to_alpha_lt_inner(e0 = e0,
                               lx_std = lx_std,
@@ -208,7 +208,7 @@ test_that("'alpha_to_alpha_lt_inner' works", {
 test_that("'alpha_to_alpha_single_inner' works", {
   e0 <- 28.3
   lx_std <- lx_west_7_complete$lx
-  agetime_step <- 5
+  time_step <- 5
   pr_fem <- 0.49
   ans <- e0_to_alpha_single_inner(e0 = e0,
                                   lx_std = lx_std,
@@ -322,7 +322,7 @@ test_that("'tfr_to_asfr' works with valid inputs", {
                          value = 3 * proportions(asfr))
   ans_obtained <- tfr_to_asfr(tfr = tfr,
                               asfr_std = asfr_std,
-                              agetime_step = 5)
+                              time_step = 5)
   ans_expected <- asfr
   expect_equal(ans_obtained, ans_expected)
 })

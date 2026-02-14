@@ -67,10 +67,50 @@ aggregate_Lx_ages_single <- function(Lx, age_open) {
 }
 
 
+
+alpha_param_from_e0_param_lt <- function(e0_mean, e0_sd, lx_std, pr_fem) {
+  p <- seq(from = 0.01, to = 0.99, by = 0.01)
+  make_e0 <- function(alpha) {
+    vapply(alpha,
+           FUN = alpha_to_e0_lt,
+           FUN.VALUE = 0,
+           lx_std = lx_std,
+           pr_fem = pr_fem)
+  }
+  alpha <- qnorm(p)
+  e0 <- make_e0(alpha)
+  mod <- lm(alpha ~ e0)
+  coef <- coef(mod)
+  alpha_mean_init <- coef[[1L]] + coef[[2]] * e0_mean
+  alpha_sd_init <- abs(coef[[2]]) * e0_sd
+  log_alpha_sd_init <- log(alpha_sd_init)
+  par <- c(alpha_mean = alpha_mean_init,
+           log_alpha_sd = log_alpha_sd_init)
+  fn <- function(x) {
+    alpha_mean <- x[[1L]]
+    alpha_sd <- exp(x[[2L]])
+    alpha <- qnorm(p = p, mean = alpha_mean, sd = alpha_sd)
+    e0 <- make_e0(alpha)
+    e0_mean_try <- mean(e0)
+    e0_sd_try <- sd(e0)
+    ((e0_mean_try - e0_mean)/e0_mean)^2 + ((e0_sd_try - e0_sd)/e0_sd)^2
+  }
+  out <- optim(par = par, fn = fn)
+  out$par
+}
+
+
+
+
+
+
 ## HAS_TESTS
-#' Calculate Life Expectancy at Birth Given Alpha - Life Table Age Groups
+#' Calculate Life Expectancy at Birth Given Alpha
 #'
 #' Life expectancy is for total population.
+#'
+#' `alpha_to_e0_lt()` uses abridged life table ages
+#' `alpha_to_e0_single()` using single year of age
 #'
 #' @param alpha Value from Brass logit model.
 #' Length-1 numeric vector or rvec.
@@ -80,28 +120,15 @@ aggregate_Lx_ages_single <- function(Lx, age_open) {
 #'
 #' @returns A length-1 vector or rvec.
 #'
-#' @noRd
+#' @export
 alpha_to_e0_lt <- function(alpha, lx_std, pr_fem) {
   lx <- alpha_to_lx(alpha = alpha, lx_std = lx_std)
   Lx <- lx_to_Lx_lt(lx)
   Lx_to_e0(Lx = Lx, pr_fem = pr_fem)
 }
 
-
-## HAS_TESTS
-#' Calculate Life Expectancy at Birth Given Alpha - Single-Year Age Groups
-#'
-#' Life expectancy is for total population.
-#'
-#' @param alpha Value from Brass logit model.
-#' Length-1 numeric vector or rvec.
-#' @param lx_std Standard schedule for 'lx'. Numeric vector.
-#' @param pr_fem Proportion of births that are
-#' female. Numeric scalar.
-#'
-#' @returns A length-1 vector or rvec.
-#'
-#' @noRd
+#' @rdname alpha_to_e0_lt
+#' @export
 alpha_to_e0_single <- function(alpha, lx_std, pr_fem) {
   lx <- alpha_to_lx(alpha = alpha, lx_std = lx_std)
   Lx <- lx_to_Lx_single(lx)
@@ -354,7 +381,21 @@ Lx_to_e0 <- function(Lx, pr_fem) {
   e0_male <- sum(Lx_male)
   pr_fem * e0_female + (1 - pr_fem) * e0_male
 }
-  
+
+
+Lx_to_Sx <- function(Lx, time_step) {
+  n <- length(Lx)
+  n2 <- n %/% 2L
+  ans <- Lx
+  i_newborn <- c(1L, n2 + 1L)
+  i_oldest <- c(n2, n)
+  i_second_oldest <- i_oldest - 1L
+  ans[i_newborn] <- ans[i_newborn] / time_step
+  ans[-i_newborn] <- Lx[-i_newborn] / Lx[-i_oldest]
+  ans[i_oldest] <- Lx[i_oldest] / (Lx[i_second_oldest] + Lx[i_oldest])
+  ans
+}
+
 
 ## HAS_TESTS
 #' Calculate Age-Specific Fertility Rates
@@ -364,13 +405,13 @@ Lx_to_e0 <- function(Lx, pr_fem) {
 #' numeric vector or rvec.
 #' @param asfr_std A standard set of ASFR.
 #' Normalised internally. A data frame.
-#' @param agetime_step Numeric scalar.
+#' @param time_step Numeric scalar.
 #'
 #' @returns A length-1 numeric vector or rvec.
 #'
 #' @noRd
-tfr_to_asfr <- function(tfr, asfr_std, agetime_step) {
+tfr_to_asfr <- function(tfr, asfr_std, time_step) {
   asfr_val <- asfr_std$value
-  (tfr * asfr_val) / (agetime_step * sum(asfr_val))
+  (tfr * asfr_val) / (time_step * sum(asfr_val))
 }
 
